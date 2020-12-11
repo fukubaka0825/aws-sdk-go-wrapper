@@ -269,12 +269,25 @@ func (b *Bucket) CopyFrom(srcBucket, srcPath, destPath string, opt ...CopyObject
 
 // DeleteObject deletes the object of target path.
 func (b *Bucket) DeleteObject(path string) error {
-	_, err := b.service.client.DeleteObject(&SDK.DeleteObjectInput{
+	return b.deleteObject(&SDK.DeleteObjectInput{
 		Bucket: pointers.String(b.nameWithPrefix),
 		Key:    pointers.String(path),
 	})
+}
+
+// DeleteObjectWithVersionID deletes the object of target path and versionId.
+func (b *Bucket) DeleteObjectWithVersionID(path string, versionID string) error {
+	return b.deleteObject(&SDK.DeleteObjectInput{
+		Bucket:    pointers.String(b.nameWithPrefix),
+		Key:       pointers.String(path),
+		VersionId: pointers.String(versionID),
+	})
+}
+
+func (b *Bucket) deleteObject(in *SDK.DeleteObjectInput) error {
+	_, err := b.service.client.DeleteObject(in)
 	if err != nil {
-		b.service.Errorf("error on `GetObject` operation; bucket=%s; error=%s;", b.nameWithPrefix, err.Error())
+		b.service.Errorf("error on `DeleteObject` operation; bucket=%s; error=%s;", b.nameWithPrefix, err.Error())
 	}
 	return err
 }
